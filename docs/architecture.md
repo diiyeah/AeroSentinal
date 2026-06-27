@@ -78,4 +78,5 @@ Each service class has a `MODEL_LOADED` flag. When `False`, physics-informed sim
 | Backend | FastAPI, Pydantic v2 | Async Python, auto-generated OpenAPI docs, schema validation |
 | ML (Phase 2) | PyTorch → ONNX, XGBoost, scikit-learn | ONNX for portable inference, PyTorch for deep learning |
 | NLP (Phase 1) | scikit-learn TF-IDF | Lightweight retrieval. Phase 2: Fine-tuned LLM |
+| Data Storage | PostgreSQL, MongoDB Atlas, Elasticsearch, AWS S3 | Polyglot persistence: Postgres (metadata), Mongo (logs), Elastic (telemetry), S3 (models) |
 | Testing | pytest + httpx | Async test client for FastAPI |

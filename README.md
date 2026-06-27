@@ -175,12 +175,28 @@ graph TD
     LLaMA --> NLPRepair
     Gemma --> NLPRepair
 
+    subgraph DataStorage ["⑦ Polyglot Data Storage"]
+        Postgres[(PostgreSQL<br/>Fleet Metadata)]
+        Mongo[(MongoDB Atlas<br/>NLP & ACARS Logs)]
+        Elastic[(Elasticsearch<br/>Live Telemetry)]
+        S3[(AWS S3<br/>Model Weights)]
+    end
+
+    Thermo -.-> Elastic
+    Kine -.-> Elastic
+    Avionics -.-> Elastic
+    NLPLogs -.-> Mongo
+    ACARS -.-> Mongo
+    Fleet -.-> Postgres
+    S3 -.-> ONNX
+
     classDef sources fill:#1e40af,stroke:#fff,stroke-width:2px,color:#fff;
     classDef ingestion fill:#1d4ed8,stroke:#fff,stroke-width:2px,color:#fff;
     classDef feature fill:#7c3aed,stroke:#fff,stroke-width:2px,color:#fff;
     classDef models fill:#dc2626,stroke:#fff,stroke-width:2px,color:#fff;
     classDef anomaly fill:#b45309,stroke:#fff,stroke-width:2px,color:#fff;
     classDef edge fill:#047857,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef storage fill:#0f172a,stroke:#fff,stroke-width:2px,color:#fff;
 
     class Engine,APU,ECS,LG,Brakes,EMA,Hyd,ADAPT,Bat,CFRP,QAR,NLPData sources;
     class Thermo,Kine,Acoustic,Avionics,QARStream,NLPLogs ingestion;
@@ -188,6 +204,7 @@ graph TD
     class BiLSTM,Transformer,BCADATrans,ConvAE,GPR,BayesNet,TCN,CNNCWT,ConvMHSA,RF,LLaMA,Gemma models;
     class AnomalyDet,SLIDE,Kalman,RULConf,AOG,ACARS anomaly;
     class ONNX,R3F,Recharts,WhatIf,Fleet,NLPRepair edge;
+    class Postgres,Mongo,Elastic,S3 storage;
 ```
 
 ### 🔍 Detailed Architecture Explanation
@@ -244,6 +261,7 @@ graph TD
 - **ML / AI Layer:** PyTorch, ONNX Runtime, TensorRT INT8 Quantization, scikit-learn, HuggingFace Transformers
 - **Data Processing:** Pandas, NumPy, SciPy, PyWavelets, SHAP, SMOTE, spaCy
 - **Edge / Deployment:** ONNX Runtime, Vercel / Railway cloud deploy, Docker
+- **Data Storage (Polyglot Persistence):** PostgreSQL (Relational DB), MongoDB Atlas (Unstructured ML Logs), Elasticsearch (Time-Series Telemetry), AWS S3 (Models & PCAPs)
 
 ---
 
