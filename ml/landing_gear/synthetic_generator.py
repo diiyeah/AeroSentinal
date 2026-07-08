@@ -218,7 +218,7 @@ def generate_landing_gear_dataset(
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
         df.to_csv(save_path, index=False)
-        print(f"\n  ✓ Saved {len(df)} records to {save_path}")
+        print(f"\n  [OK] Saved {len(df)} records to {save_path}")
 
     return df
 
@@ -233,8 +233,8 @@ if __name__ == "__main__":
     output_path = project_root / "ml" / "data" / "processed" / "landing_gear" / "landing_gear_synthetic.csv"
     
     print("=" * 60)
-    print("  AeroSentinal — Landing Gear Synthetic Data Generator")
-    print("  ⚠ SYNTHETIC DATA: Physics-informed, not real telemetry")
+    print("  AeroSentinal - Landing Gear Synthetic Data Generator")
+    print("  [!] SYNTHETIC DATA: Physics-informed, not real telemetry")
     print("=" * 60)
     
     df = generate_landing_gear_dataset(n_samples=5000, save_path=output_path)

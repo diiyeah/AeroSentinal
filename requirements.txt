@@ -14,7 +14,7 @@ shap>=0.46.0
 
 # --- Data & Scientific Computing ---
 numpy>=2.4.0
-pandas>=3.0.0
+pandas>=2.0.0
 scipy>=1.17.0
 matplotlib>=3.10.0
 seaborn>=0.13.0

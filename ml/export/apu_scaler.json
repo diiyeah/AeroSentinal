@@ -1,0 +1,42 @@
+{
+  "feature_names": [
+    "egt_steady_state_c",
+    "startup_time_constant_s",
+    "fuel_flow_kg_h",
+    "turbine_inlet_temp_c",
+    "rpm_pct",
+    "time_to_90pct_s",
+    "max_egt_rate_c_per_s",
+    "egt_margin_c"
+  ],
+  "means": [
+    690.6425,
+    13.9467,
+    151.835,
+    898.2725,
+    98.33135,
+    32.1145,
+    51.07525,
+    109.3575
+  ],
+  "scales": [
+    52.9800504317427,
+    4.261097758794088,
+    23.040183918536762,
+    39.25083685413599,
+    1.2003481484552725,
+    9.816676614313014,
+    11.412902695524044,
+    52.9800504317427
+  ],
+  "defaults": {
+    "egt_steady_state_c": 690.6425,
+    "startup_time_constant_s": 13.9467,
+    "fuel_flow_kg_h": 151.835,
+    "turbine_inlet_temp_c": 898.2725,
+    "rpm_pct": 98.33135,
+    "time_to_90pct_s": 32.1145,
+    "max_egt_rate_c_per_s": 51.07525,
+    "egt_margin_c": 109.3575
+  }
+}

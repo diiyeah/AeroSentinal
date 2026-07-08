@@ -8,7 +8,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 
 export default function Dashboard() {
-  const { aircraft, logs = [] } = useStore();
+  const { aircraft } = useStore();
 
   // Determine system status based on aircraft state
   const hasHydraulicsFault = aircraft.hydraulics.status !== "Healthy";
@@ -16,6 +16,46 @@ export default function Dashboard() {
   const hasEcsFault = aircraft.ecs.status !== "Healthy";
   const engineRUL = aircraft.engine.metrics.rulCycles ?? 98;
   const faults = aircraft.crossDomainAlerts || [];
+
+  // Generate dynamic event logs based on current subsystem statuses and alerts
+  const logs: any[] = [];
+  
+  if (hasEngineFault) {
+    logs.push({
+      id: "eng-1",
+      timestamp: new Date().toISOString(),
+      level: aircraft.engine.status === "Critical" ? "CRITICAL" : "WARNING",
+      message: `Engine health at ${aircraft.engine.score}% - RUL: ${engineRUL} cycles`,
+      subsystem: "engine"
+    });
+  }
+  if (hasHydraulicsFault) {
+    logs.push({
+      id: "hyd-1",
+      timestamp: new Date().toISOString(),
+      level: aircraft.hydraulics.status === "Critical" ? "CRITICAL" : "WARNING",
+      message: `Hydraulics pressure anomaly detected`,
+      subsystem: "hydraulics"
+    });
+  }
+  if (hasEcsFault) {
+    logs.push({
+      id: "ecs-1",
+      timestamp: new Date().toISOString(),
+      level: aircraft.ecs.status === "Critical" ? "CRITICAL" : "WARNING",
+      message: `ECS fouling detected: ${aircraft.ecs.metrics.foulingPct ?? 0}%`,
+      subsystem: "ecs"
+    });
+  }
+  faults.forEach((alert, i) => {
+    logs.push({
+      id: `alert-${i}`,
+      timestamp: new Date().toISOString(),
+      level: "CRITICAL",
+      message: alert,
+      subsystem: "fusion"
+    });
+  });
 
   return (
     <main className="flex-grow relative flex flex-col items-center justify-center min-h-[calc(100vh-140px)] w-full">
@@ -157,7 +197,7 @@ export default function Dashboard() {
                <ambientLight intensity={0.5} />
                <directionalLight position={[10, 10, 5]} intensity={1} />
                <Environment preset="city" />
-               <AircraftModel faults={faults.map(f => ({ subsystem: f.toLowerCase().includes('hydraulic') ? 'hydraulics' : f.toLowerCase().includes('engine') ? 'engine' : 'ecs' }))} />
+               <AircraftModel />
                <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 1.5} minDistance={5} maxDistance={20} />
              </Canvas>
           </div>
