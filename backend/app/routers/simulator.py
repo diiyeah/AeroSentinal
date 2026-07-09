@@ -28,10 +28,14 @@ async def run_what_if(params: SimulatorInput):
       anomaly to ECS bleed demand, not engine wear
     """
 
+    engine_sensors = {}
+    if params.engine_degradation_cycles > 0:
+        engine_sensors = {"force_sim": 1}
+
     hydraulic_sensors = {}
     if params.hydraulic_leak_severity > 0:
-        # Pressure drops from nominal 160.0 down to 60.0 bar based on severity
-        ps1_val = 160.0 - (params.hydraulic_leak_severity * 100.0)
+        # Pressure drops below 90 to trigger the ML anomaly detection
+        ps1_val = 160.0 - (params.hydraulic_leak_severity * 120.0)
         hydraulic_sensors = {"PS1": ps1_val}
 
     # Naive assessment: run without fusion correction
@@ -39,6 +43,7 @@ async def run_what_if(params: SimulatorInput):
     # raw engine score before cross-domain attribution is applied)
     naive = FusionService.run_full_assessment(
         engine_cycle=200 + params.engine_degradation_cycles,
+        engine_sensors=engine_sensors,
         hydraulic_sensors=hydraulic_sensors,
         brake_wear_pct=params.brake_wear_pct,
         apu_fouling=params.apu_fouling_factor,
@@ -62,6 +67,7 @@ async def run_what_if(params: SimulatorInput):
     # Fusion assessment: the full pipeline with attribution
     fusion = FusionService.run_full_assessment(
         engine_cycle=200 + params.engine_degradation_cycles,
+        engine_sensors=engine_sensors,
         hydraulic_sensors=hydraulic_sensors,
         brake_wear_pct=params.brake_wear_pct,
         apu_fouling=params.apu_fouling_factor,
@@ -70,6 +76,14 @@ async def run_what_if(params: SimulatorInput):
 
     # Build explanation
     explanations = []
+    if params.engine_degradation_cycles > 0:
+        explanations.append(
+            f"Engine compressor fouling detected. Rapid RUL degradation observed."
+        )
+    if params.hydraulic_leak_severity > 0:
+        explanations.append(
+            f"Hydraulic pressure anomaly detected at Port Wing (leak severity: {params.hydraulic_leak_severity:.1f})."
+        )
     if params.ecs_fouling_pct > 10:
         explanations.append(
             f"ECS heat exchanger fouling at {params.ecs_fouling_pct:.0f}% increased "

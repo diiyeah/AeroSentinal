@@ -262,7 +262,23 @@ export default function Dashboard() {
               )}
             </div>
             <div className="p-4 border-t border-secondary/20">
-              <button className="w-full bg-tactical-amber text-on-primary-fixed text-[11px] font-bold uppercase tracking-widest py-2 rounded hover:bg-primary-fixed-dim transition-colors active:scale-95">
+              <button 
+                onClick={() => {
+                  const logText = logs.length > 0 
+                    ? logs.map(l => `[${l.timestamp}] ${l.level}: ${l.message} (${l.subsystem} Subsystem)`).join("\\n")
+                    : "SYSTEM READY - Awaiting telemetry...";
+                  const blob = new Blob([logText], { type: "text/plain" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `aerosentinal-logs-${new Date().toISOString().replace(/:/g, '-')}.txt`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                }}
+                className="w-full bg-tactical-amber text-on-primary-fixed text-[11px] font-bold uppercase tracking-widest py-2 rounded hover:bg-primary-fixed-dim transition-colors active:scale-95"
+              >
                 EXPORT LOGS
               </button>
             </div>

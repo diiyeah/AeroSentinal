@@ -8,10 +8,16 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 
 export default function Simulator() {
-  const { aircraft, setPhysicsParam, runSimulation } = useStore();
+  const { aircraft, setPhysicsParam, runSimulation, attribution } = useStore();
   const engineRUL = Number(aircraft.engine.metrics.rulCycles ?? 98);
   const faults = aircraft.crossDomainAlerts || [];
-  const logs: any[] = [];
+  
+  const logs: any[] = attribution ? [{
+    id: '1',
+    timestamp: new Date().toISOString(),
+    level: 'WARNING',
+    message: attribution
+  }] : [];
 
   const handleInjectFault = (subsystem: "engine" | "hydraulics" | "ecs", message: string) => {
     if (subsystem === "ecs") {
