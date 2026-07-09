@@ -67,8 +67,8 @@ def main():
     args = parser.parse_args()
 
     print("=" * 60)
-    print("  AeroSentinal — Synthetic Data Generation")
-    print("  ⚠ All generated data is clearly labeled as SYNTHETIC")
+    print("  AeroSentinal - Synthetic Data Generation")
+    print("  [!] All generated data is clearly labeled as SYNTHETIC")
     print("=" * 60)
 
     subsystems = list(GENERATORS.keys()) if args.subsystem == "all" else [args.subsystem]
@@ -81,17 +81,17 @@ def main():
         try:
             df = GENERATORS[name]()
             results[name] = True
-            print(f"  ✓ {name}: {df.shape[0]} records generated")
+            print(f"  [OK] {name}: {df.shape[0]} records generated")
         except Exception as e:
             results[name] = False
-            print(f"  ✗ {name}: {e}")
+            print(f"  [X] {name}: {e}")
 
     # Summary
     print(f"\n{'='*60}")
     print("  Generation Summary")
     print(f"{'='*60}")
     for name, success in results.items():
-        status = "✓ Generated" if success else "✗ Failed"
+        status = "[OK] Generated" if success else "[X] Failed"
         print(f"  {status}: {name}")
 
     return 0 if all(results.values()) else 1

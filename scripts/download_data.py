@@ -194,7 +194,6 @@ def download_dataset(name: str) -> bool:
 
     config = DATASETS[name]
     output_dir = config["output_dir"]
-    zip_path = output_dir / config["zip_name"]
 
     print(f"\n{'='*60}")
     print(f"  {config['description']}")
@@ -212,6 +211,37 @@ def download_dataset(name: str) -> bool:
 
     # Create output directory
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    if name == "cmapss":
+        # Download files individually from Hugging Face mirror
+        base_url = "https://huggingface.co/datasets/DeveloperMindset123/CMAPSS_Jet_Engine_Simulated_Data/resolve/main/"
+        success = True
+        for filename in config["expected_files"]:
+            dest_path = output_dir / filename
+            if dest_path.exists():
+                print(f"  File already exists: {filename}")
+                continue
+            url = f"{base_url}{filename}"
+            print(f"  Downloading {filename} from {url}...")
+            try:
+                # Add headers to avoid user-agent blocking if needed
+                req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urlopen(req) as response:
+                    with open(dest_path, 'wb') as f:
+                        f.write(response.read())
+                print(f"  ✓ Downloaded {filename}")
+            except Exception as e:
+                print(f"  [X] Failed to download {filename}: {e}")
+                success = False
+                break
+        if success:
+            print(f"\n  Validating downloaded files...")
+            if validate_dataset(output_dir, config["expected_files"], config["validation"]):
+                print(f"\n  [OK] {name} dataset ready!")
+                return True
+        return False
+
+    zip_path = output_dir / config["zip_name"]
 
     # Download
     print(f"\n  Downloading {config['zip_name']}...")
@@ -240,6 +270,7 @@ def download_dataset(name: str) -> bool:
         print(f"\n  [!] {name} dataset downloaded but some validations failed.")
         print(f"     Files are in {output_dir} -- check manually.")
         return True  # Still consider it a success if files are present
+
 
 
 def main():

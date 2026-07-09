@@ -9,19 +9,26 @@ import { OrbitControls, Environment } from "@react-three/drei";
 
 export default function Simulator() {
   const { aircraft, setPhysicsParam, runSimulation } = useStore();
-  const engineRUL = aircraft.engine.metrics.rulCycles ?? 98;
+  const engineRUL = Number(aircraft.engine.metrics.rulCycles ?? 98);
   const faults = aircraft.crossDomainAlerts || [];
   const logs: any[] = [];
 
   const handleInjectFault = (subsystem: "engine" | "hydraulics" | "ecs", message: string) => {
     if (subsystem === "ecs") {
       setPhysicsParam("ecs", "foulingPct", 85);
-      runSimulation();
+    } else if (subsystem === "engine") {
+      setPhysicsParam("engine", "degradationCycles", 100);
+    } else if (subsystem === "hydraulics") {
+      setPhysicsParam("hydraulics", "leakSeverity", 0.7);
     }
+    runSimulation();
   };
 
   const handleReset = () => {
     setPhysicsParam("ecs", "foulingPct", 0);
+    setPhysicsParam("engine", "degradationCycles", 0);
+    setPhysicsParam("hydraulics", "leakSeverity", 0);
+    setPhysicsParam("landingGear", "brakeWearPct", 0);
     runSimulation();
   };
 
@@ -89,7 +96,7 @@ export default function Simulator() {
                <ambientLight intensity={0.5} />
                <directionalLight position={[10, 10, 5]} intensity={1} />
                <Environment preset="city" />
-               <AircraftModel faults={faults.map(f => ({ subsystem: f.toLowerCase().includes('hydraulic') ? 'hydraulics' : f.toLowerCase().includes('engine') ? 'engine' : 'ecs' })) as any} />
+               <AircraftModel />
                <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 1.5} minDistance={5} maxDistance={20} />
              </Canvas>
           </div>

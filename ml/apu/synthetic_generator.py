@@ -201,7 +201,7 @@ def generate_apu_dataset(
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
         df.to_csv(save_path, index=False)
-        print(f"\n  ✓ Saved {len(df)} APU unit records to {save_path}")
+        print(f"\n  [OK] Saved {len(df)} APU unit records to {save_path}")
 
     return df
 
@@ -215,8 +215,8 @@ if __name__ == "__main__":
     output_path = project_root / "data" / "processed" / "apu" / "apu_synthetic.csv"
 
     print("=" * 60)
-    print("  AeroSentinal — APU Synthetic Data Generator")
-    print("  ⚠ SYNTHETIC DATA: Physics-informed, not real telemetry")
+    print("  AeroSentinal - APU Synthetic Data Generator")
+    print("  [!] SYNTHETIC DATA: Physics-informed, not real telemetry")
     print("=" * 60)
 
     df = generate_apu_dataset(n_units=200, save_path=output_path)

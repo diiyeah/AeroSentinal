@@ -32,7 +32,9 @@ export type AircraftState = {
 export type PhysicsSimInputs = {
   ecs: { foulingPct: number; flightPhase: 'ground'|'climb'|'cruise'|'descent'; ambientTempOffsetK: number };
   apu: { foulingPct: number; egtOffset: number };
-  landingGear: { aircraftMassKg: number; wheelVelocityKts: number; brakePressurePsi: number; runwayFriction: number };
+  landingGear: { aircraftMassKg: number; wheelVelocityKts: number; brakePressurePsi: number; runwayFriction: number; brakeWearPct: number };
+  engine: { degradationCycles: number };
+  hydraulics: { leakSeverity: number };
 };
 
 export type DatasetTrajectoryInputs = {
@@ -126,7 +128,9 @@ export const useStore = create<AppState>((set, get) => ({
   physicsInputs: {
     ecs: { foulingPct: 0, flightPhase: 'cruise', ambientTempOffsetK: 0 },
     apu: { foulingPct: 0, egtOffset: 0 },
-    landingGear: { aircraftMassKg: 70000, wheelVelocityKts: 65, brakePressurePsi: 2500, runwayFriction: 0.8 },
+    landingGear: { aircraftMassKg: 70000, wheelVelocityKts: 65, brakePressurePsi: 2500, runwayFriction: 0.8, brakeWearPct: 0 },
+    engine: { degradationCycles: 0 },
+    hydraulics: { leakSeverity: 0 },
   },
   datasetInputs: {
     engine: { unitId: "1", cycle: 100 },
@@ -169,7 +173,7 @@ export const useStore = create<AppState>((set, get) => ({
       const params = new URLSearchParams({
         aircraft_id: state.aircraft.aircraftId,
         engine_cycle: String(state.datasetInputs.engine.cycle),
-        brake_wear_pct: String(0), // Would use actual calculation or proxy
+        brake_wear_pct: String(state.physicsInputs.landingGear.brakeWearPct),
         apu_fouling: String(state.physicsInputs.apu.foulingPct),
         ecs_fouling: String(state.physicsInputs.ecs.foulingPct),
       });
@@ -222,9 +226,9 @@ export const useStore = create<AppState>((set, get) => ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ecs_fouling_pct: state.physicsInputs.ecs.foulingPct,
-          engine_degradation_cycles: 0,
-          hydraulic_leak_severity: 0,
-          brake_wear_pct: 0, // Placeholder
+          engine_degradation_cycles: state.physicsInputs.engine.degradationCycles,
+          hydraulic_leak_severity: state.physicsInputs.hydraulics.leakSeverity,
+          brake_wear_pct: state.physicsInputs.landingGear.brakeWearPct,
           apu_fouling_factor: state.physicsInputs.apu.foulingPct / 100,
         }),
       });

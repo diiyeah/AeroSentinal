@@ -328,7 +328,7 @@ class ECSSimulator:
             save_path = Path(save_path)
             save_path.parent.mkdir(parents=True, exist_ok=True)
             df.to_csv(save_path, index=False)
-            print(f"\n  ✓ Saved {len(df)} scenarios to {save_path}")
+            print(f"\n  [OK] Saved {len(df)} scenarios to {save_path}")
 
         return df
 
@@ -342,8 +342,8 @@ if __name__ == "__main__":
     output_path = project_root / "data" / "processed" / "ecs" / "ecs_scenarios.csv"
 
     print("=" * 60)
-    print("  AeroSentinal — ECS Reverse-Brayton Cycle Simulator")
-    print("  ⚠ SYNTHETIC DATA: Thermodynamic model, not real telemetry")
+    print("  AeroSentinal - ECS Reverse-Brayton Cycle Simulator")
+    print("  [!] SYNTHETIC DATA: Thermodynamic model, not real telemetry")
     print("=" * 60)
 
     sim = ECSSimulator()

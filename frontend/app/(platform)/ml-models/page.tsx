@@ -1,8 +1,68 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Cpu, AlertTriangle, PlaneLanding, Power, Activity, Download, Timer } from "lucide-react";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
 export default function MLModels() {
+  const [modelStatuses, setModelStatuses] = useState<Record<string, string>>({
+    engine: "loading",
+    hydraulics: "loading",
+    landing_gear: "loading",
+    apu: "loading",
+    ecs: "physics_model"
+  });
+
+  useEffect(() => {
+    const fetchStatuses = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.subsystems) {
+            setModelStatuses(data.subsystems);
+          }
+        } else {
+          throw new Error();
+        }
+      } catch {
+        setModelStatuses({
+          engine: "offline",
+          hydraulics: "offline",
+          landing_gear: "offline",
+          apu: "offline",
+          ecs: "offline"
+        });
+      }
+    };
+
+    fetchStatuses();
+    const interval = setInterval(fetchStatuses, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const getStatusDisplay = (subsystem: string) => {
+    const status = modelStatuses[subsystem];
+    if (status === "model_loaded") {
+      return <span className="text-status-optimal tracking-wide font-medium">LIVE (ONNX)</span>;
+    } else if (status === "simulation") {
+      return <span className="text-tactical-amber tracking-wide font-medium">SIMULATION</span>;
+    } else if (status === "physics_model") {
+      return <span className="text-status-optimal tracking-wide font-medium">LIVE (PHYSICS)</span>;
+    } else if (status === "offline") {
+      return <span className="text-status-critical tracking-wide font-medium">OFFLINE</span>;
+    }
+    return <span className="text-on-surface-variant tracking-wide font-medium">LOADING...</span>;
+  };
+
+  const getCardBorder = (subsystem: string, defaultClass: string = "") => {
+    const status = modelStatuses[subsystem];
+    if (status === "offline") return "border-t-status-critical border-secondary/20";
+    if (status === "simulation") return "border-t-tactical-amber border-secondary/20";
+    return defaultClass;
+  };
+
   return (
     <main className="flex-grow px-8 lg:px-12 py-8 max-w-[1440px] mx-auto w-full font-sans">
       <div className="flex items-center gap-2 mb-8 text-secondary/60 text-[11px] font-bold uppercase tracking-widest">
@@ -22,19 +82,19 @@ export default function MLModels() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         
         {/* Turbofan Engine Card */}
-        <div className="bg-panel-surface border border-secondary/20 rounded-lg p-6 relative flex flex-col border-t-2 border-t-status-optimal">
+        <div className={`bg-panel-surface border rounded-lg p-6 relative flex flex-col border-t-2 ${getCardBorder("engine", "border-t-status-optimal border-secondary/20")}`}>
           <div className="flex justify-between items-start mb-6">
             <div>
               <h2 className="text-xl font-semibold text-on-surface mb-1">Turbofan Engine</h2>
               <span className="text-[11px] font-bold uppercase tracking-widest text-secondary/70">BiLSTM + Attention</span>
             </div>
-            <Cpu className="text-status-optimal w-6 h-6" />
+            <Cpu className={`${modelStatuses.engine === "simulation" ? "text-tactical-amber" : "text-status-optimal"} w-6 h-6`} />
           </div>
           
           <div className="space-y-4 font-mono text-sm mb-6 flex-grow">
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Status</span>
-              <span className="text-status-optimal tracking-wide font-medium">LIVE</span>
+              {getStatusDisplay("engine")}
             </div>
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Dataset</span>
@@ -46,7 +106,7 @@ export default function MLModels() {
             </div>
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Latency</span>
-              <span className="text-on-surface">42ms</span>
+              <span className="text-on-surface">{modelStatuses.engine === "model_loaded" ? "42ms" : "N/A"}</span>
             </div>
           </div>
           
@@ -58,19 +118,19 @@ export default function MLModels() {
         </div>
 
         {/* Hydraulics Card */}
-        <div className="bg-panel-surface border border-secondary/20 rounded-lg p-6 relative flex flex-col border-t-2 border-t-status-critical tactical-glow">
+        <div className={`bg-panel-surface border rounded-lg p-6 relative flex flex-col border-t-2 ${getCardBorder("hydraulics", "border-t-status-optimal border-secondary/20")}`}>
           <div className="flex justify-between items-start mb-6">
             <div>
               <h2 className="text-xl font-semibold text-on-surface mb-1">Hydraulics</h2>
               <span className="text-[11px] font-bold uppercase tracking-widest text-secondary/70">1D Conv Autoencoder</span>
             </div>
-            <AlertTriangle className="text-status-critical w-6 h-6 critical-blink" />
+            <AlertTriangle className={`${modelStatuses.hydraulics === "simulation" ? "text-tactical-amber" : "text-status-optimal"} w-6 h-6`} />
           </div>
           
           <div className="space-y-4 font-mono text-sm mb-6 flex-grow">
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Status</span>
-              <span className="text-status-critical tracking-wide font-medium">LIVE - ALERT</span>
+              {getStatusDisplay("hydraulics")}
             </div>
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Dataset</span>
@@ -78,11 +138,11 @@ export default function MLModels() {
             </div>
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Anomaly Score</span>
-              <span className="text-status-critical">0.89</span>
+              <span className="text-on-surface">{modelStatuses.hydraulics === "model_loaded" ? "Computed" : "Simulated"}</span>
             </div>
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Latency</span>
-              <span className="text-on-surface">18ms</span>
+              <span className="text-on-surface">{modelStatuses.hydraulics === "model_loaded" ? "18ms" : "N/A"}</span>
             </div>
           </div>
           
@@ -94,19 +154,19 @@ export default function MLModels() {
         </div>
 
         {/* Landing Gear Card */}
-        <div className="bg-panel-surface border border-secondary/20 rounded-lg p-6 relative flex flex-col border-t-2 border-t-tactical-amber">
+        <div className={`bg-panel-surface border rounded-lg p-6 relative flex flex-col border-t-2 ${getCardBorder("landing_gear", "border-t-status-optimal border-secondary/20")}`}>
           <div className="flex justify-between items-start mb-6">
             <div>
               <h2 className="text-xl font-semibold text-on-surface mb-1">Landing Gear</h2>
               <span className="text-[11px] font-bold uppercase tracking-widest text-secondary/70">XGBoost</span>
             </div>
-            <PlaneLanding className="text-tactical-amber w-6 h-6" />
+            <PlaneLanding className={`${modelStatuses.landing_gear === "simulation" ? "text-tactical-amber" : "text-status-optimal"} w-6 h-6`} />
           </div>
           
           <div className="space-y-4 font-mono text-sm mb-6 flex-grow">
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Status</span>
-              <span className="text-tactical-amber tracking-wide font-medium">PENDING UPDATE</span>
+              {getStatusDisplay("landing_gear")}
             </div>
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Dataset</span>
@@ -118,7 +178,7 @@ export default function MLModels() {
             </div>
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Latency</span>
-              <span className="text-on-surface">5ms</span>
+              <span className="text-on-surface">{modelStatuses.landing_gear === "model_loaded" ? "5ms" : "N/A"}</span>
             </div>
           </div>
           
@@ -130,19 +190,19 @@ export default function MLModels() {
         </div>
 
         {/* APU Health Card */}
-        <div className="bg-panel-surface border border-secondary/20 rounded-lg p-6 relative flex flex-col border-t-2 border-t-status-optimal">
+        <div className={`bg-panel-surface border rounded-lg p-6 relative flex flex-col border-t-2 ${getCardBorder("apu", "border-t-status-optimal border-secondary/20")}`}>
           <div className="flex justify-between items-start mb-6">
             <div>
               <h2 className="text-xl font-semibold text-on-surface mb-1">APU Health</h2>
               <span className="text-[11px] font-bold uppercase tracking-widest text-secondary/70">Random Forest</span>
             </div>
-            <Power className="text-status-optimal w-6 h-6" />
+            <Power className={`${modelStatuses.apu === "simulation" ? "text-tactical-amber" : "text-status-optimal"} w-6 h-6`} />
           </div>
           
           <div className="space-y-4 font-mono text-sm mb-6 flex-grow">
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Status</span>
-              <span className="text-status-optimal tracking-wide font-medium">LIVE</span>
+              {getStatusDisplay("apu")}
             </div>
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Dataset</span>
@@ -154,7 +214,7 @@ export default function MLModels() {
             </div>
             <div className="flex justify-between border-b border-secondary/10 pb-2">
               <span className="text-on-surface-variant">Latency</span>
-              <span className="text-on-surface">12ms</span>
+              <span className="text-on-surface">{modelStatuses.apu === "model_loaded" ? "12ms" : "N/A"}</span>
             </div>
           </div>
           
@@ -179,7 +239,7 @@ export default function MLModels() {
             <div className="space-y-4 font-mono text-sm">
               <div className="flex justify-between border-b border-secondary/10 pb-2">
                 <span className="text-on-surface-variant">Status</span>
-                <span className="text-status-optimal tracking-wide font-medium">LIVE</span>
+                {getStatusDisplay("ecs")}
               </div>
               <div className="flex justify-between border-b border-secondary/10 pb-2">
                 <span className="text-on-surface-variant">Dataset</span>

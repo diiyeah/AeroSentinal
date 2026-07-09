@@ -1,0 +1,50 @@
+{
+  "feature_names": [
+    "aircraft_mass_kg",
+    "touchdown_speed_kts",
+    "brake_pressure_psi",
+    "runway_friction_coeff",
+    "braking_fraction",
+    "brake_energy_mj",
+    "peak_brake_temp_c",
+    "temp_rise_c",
+    "cumulative_cycles",
+    "wear_index"
+  ],
+  "means": [
+    65105.03542000001,
+    140.05898,
+    1743.0855799999997,
+    0.6775399999999999,
+    0.504419,
+    85.79734839999999,
+    899.9942599999999,
+    2859.91172,
+    981.0516,
+    0.52729616
+  ],
+  "scales": [
+    8661.715614913215,
+    11.53056752114136,
+    724.69142348593,
+    0.19953332653970365,
+    0.11286859190669475,
+    26.671882508893468,
+    0.4058387024422394,
+    889.0625836276328,
+    446.2156444337648,
+    0.33520362551329064
+  ],
+  "defaults": {
+    "aircraft_mass_kg": 65105.03542000001,
+    "touchdown_speed_kts": 140.05898,
+    "brake_pressure_psi": 1743.0855799999997,
+    "runway_friction_coeff": 0.6775399999999999,
+    "braking_fraction": 0.504419,
+    "brake_energy_mj": 85.79734839999999,
+    "peak_brake_temp_c": 899.9942599999999,
+    "temp_rise_c": 2859.91172,
+    "cumulative_cycles": 981.0516,
+    "wear_index": 0.52729616
+  }
+}
